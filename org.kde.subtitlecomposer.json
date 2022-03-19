@@ -60,13 +60,24 @@
 			]
 		},
 		{
-			"buildsystem": "cmake-ninja",
 			"name": "kross",
-			"sources": [
+			"buildsystem": "cmake-ninja",
+			"config-opts":
+			[
+				"-DENABLE_TESTING=OFF"
+			],
+			"sources":
+			[
 				{
-					"tag": "v5.76.0",
-					"type": "git",
-					"url": "https://invent.kde.org/frameworks/kross.git"
+					"type": "archive",
+					"url": "https://download.kde.org/stable/frameworks/5.88/portingAids/kross-5.88.0.tar.xz",
+					"sha256": "c889a3f8ceef51f8ad188e8cc98d7aae110268d23ff4ade8d7ef779bb90f5e6d",
+					"x-checker-data": {
+						"type": "anitya",
+						"project-id": 8762,
+						"stable-only": true,
+						"url-template": "https://download.kde.org/stable/frameworks/$major.$minor/portingAids/kross-$version.tar.xz"
+					 }
 				}
 			]
 		},
@@ -80,7 +91,13 @@
 				{
 					"type": "archive",
 					"url": "https://download.kde.org/stable/subtitlecomposer/subtitlecomposer-0.7.1.tar.xz",
-					"sha256": "ef9cb3c0c1fe1f40cf9d8e795859b9b28adf2da3be77a076d46bc28df4cd0255"
+					"sha256": "ef9cb3c0c1fe1f40cf9d8e795859b9b28adf2da3be77a076d46bc28df4cd0255",
+					"x-checker-data": {
+						"type": "anitya",
+						"project-id": 242855,
+						"stable-only": true,
+						"url-template": "https://download.kde.org/stable/subtitlecomposer/subtitlecomposer-$version.tar.xz"
+					}
 				}
 			]
 		}
