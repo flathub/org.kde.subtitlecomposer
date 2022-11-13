@@ -1,0 +1,26 @@
+From 2ec9412ddf297ec7b64e780f3c107ec1678ef703 Mon Sep 17 00:00:00 2001
+From: Mladen Milinkovic <maxrd2@smoothware.net>
+Date: Thu, 14 Oct 2021 01:14:34 +0200
+Subject: Fixed invalid memory read
+
+---
+ src/core/undo/undostack.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/core/undo/undostack.cpp b/src/core/undo/undostack.cpp
+index d9603fe8..ce3064d5 100644
+--- a/src/core/undo/undostack.cpp
++++ b/src/core/undo/undostack.cpp
+@@ -114,8 +114,8 @@ UndoStack::push(UndoAction *cmd)
+ 	const int idx = index();
+ 	const int idx1 = idx + 1;
+ 	levelIncrease(idx1);
+-	QUndoStack::push(cmd);
+ 	m_dirtyStack[idx] = static_cast<DirtyMode>(m_dirtyStack.at(idx) | cmd->m_dirtyMode);
++	QUndoStack::push(cmd); // NOTE: cmd can/will be deleted after push()
+ 	levelDecrease(idx1);
+ }
+ 
+-- 
+2.38.1
+
