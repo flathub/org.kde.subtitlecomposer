@@ -231,7 +231,7 @@
                         "-DCMAKE_BUILD_TYPE=Release",
                         "-DBUILD_EXAMPLES=OFF",
                         "-DBUILD_SHARED_LIBS=ON",
-                        "-DWITH_AVFFT=ON",
+                        "-DWITH_PFFFT=ON",
                         "-DWITH_LSR_BINDINGS=ON",
                         "-DWITH_OPENMP=ON",
                         "-DWITH_PFFFT=ON"
