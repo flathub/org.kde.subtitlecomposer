@@ -1,0 +1,491 @@
+From 2ac561d176aadc465ed030666fe11020577281c5 Mon Sep 17 00:00:00 2001
+From: Mladen Milinkovic <maxrd2@smoothware.net>
+Date: Fri, 8 Oct 2021 17:41:11 +0200
+Subject: Organized Tools menu scripts
+
+Scripts can contain @name, @summary, @category tags which are parsed and
+used to construct Tools menu hierarchy, titles and help text.
+---
+ .../examples/example_capitalize_all_lines.js  |  21 ++-
+ .../examples/example_iterate_selection.js     |  68 +++++----
+ .../examples/example_remove_impair_lines.js   |  12 --
+ .../examples/example_remove_odd_lines.js      |  17 +++
+ .../examples/example_trim_to_selection.js     |  12 +-
+ .../examples/remove_hearing_impaired_text.js  |  13 +-
+ src/scripting/scriptsmanager.cpp              | 138 ++++++++++++------
+ 7 files changed, 177 insertions(+), 104 deletions(-)
+ delete mode 100644 src/scripting/examples/example_remove_impair_lines.js
+ create mode 100644 src/scripting/examples/example_remove_odd_lines.js
+
+diff --git a/src/scripting/examples/example_capitalize_all_lines.js b/src/scripting/examples/example_capitalize_all_lines.js
+index 5fe5df84..fe2d9bd2 100644
+--- a/src/scripting/examples/example_capitalize_all_lines.js
++++ b/src/scripting/examples/example_capitalize_all_lines.js
+@@ -1,13 +1,18 @@
+ /*
+-    SPDX-FileCopyrightText: 2007-2009 Sergio Pistone <sergio_pistone@yahoo.com.ar>
++	SPDX-FileCopyrightText: 2007-2009 Sergio Pistone <sergio_pistone@yahoo.com.ar>
+ 
+-    SPDX-License-Identifier: GPL-2.0-or-later
++	SPDX-License-Identifier: GPL-2.0-or-later
++
++	@category Examples
++	@name Capitalize All Lines
++	@version 1.0
++	@summary Example script to capitalize first letter of each subtitle line.
++	@author SubtitleComposer Team
+ */
+ 
+-s = subtitle.instance();
+-for ( var lineIndex = 0, linesCount = s.linesCount(); lineIndex < linesCount; ++lineIndex )
+-{
+-	var line = s.line( lineIndex );
+-	var text = line.primaryText();
+-	line.setPrimaryText( text.left( 1 ).toUpper().append( text.mid( 1 ) ) );
++let s = subtitle.instance();
++for(let i = 0, n = s.linesCount(); i < n; i++) {
++	let line = s.line(i);
++	let text = line.primaryText();
++	line.setPrimaryText(text.left(1).toUpper().append(text.mid(1)));
+ }
+diff --git a/src/scripting/examples/example_iterate_selection.js b/src/scripting/examples/example_iterate_selection.js
+index f33fc170..dcc8ebea 100644
+--- a/src/scripting/examples/example_iterate_selection.js
++++ b/src/scripting/examples/example_iterate_selection.js
+@@ -1,18 +1,23 @@
+ /*
+-    SPDX-FileCopyrightText: 2007-2009 Sergio Pistone <sergio_pistone@yahoo.com.ar>
++	SPDX-FileCopyrightText: 2007-2009 Sergio Pistone <sergio_pistone@yahoo.com.ar>
+ 
+-    SPDX-License-Identifier: GPL-2.0-or-later
++	SPDX-License-Identifier: GPL-2.0-or-later
++
++	@category Examples
++	@name Iterate Selected Lines
++	@version 1.0
++	@summary Example script to iterate over selected lines and show their text.
++	@author SubtitleComposer Team
+ */
+ 
+-function RangesIterator( rangeList, forward )
+-{
+-	this.forward = typeof( forward ) == "undefined" ? true : forward;
++function RangesIterator(rangeList, forward) {
++	this.forward = forward === undefined ? true : forward;
+ 	this.rangeList = rangeList;
+ 	this.rangeIndex = this.forward ? -1 : this.rangeList.rangesCount()
+ 
+ 	this.current = function() {
+ 		return this.rangeIndex >= 0 && this.rangeIndex < this.rangeList.rangesCount() ?
+- 			this.rangeList.range( this.rangeIndex ) :
++ 			this.rangeList.range(this.rangeIndex) :
+ 			null;
+ 	};
+ 
+@@ -28,53 +33,46 @@ function RangesIterator( rangeList, forward )
+ 	};
+ }
+ 
+-function LinesIterator( rangeList, forward )
+-{
+-	this.forward = typeof( forward ) == "undefined" ? true : forward;
+-	this.rangesIt = new RangesIterator( rangeList, this.forward );
++function LinesIterator(rangeList, forward) {
++	this.forward = forward === undefined ? true : forward;
++	this.rangesIt = new RangesIterator(rangeList, this.forward);
+ 	this.lineIndex = -1;
+ 	this.subtitle = subtitle.instance();
+ 
+ 	this.current = function() {
+-		var range = this.rangesIt.current();
+-		return range != null && this.lineIndex >= range.start() && this.lineIndex < range.end()?
+- 			this.subtitle.line( this.lineIndex ) :
+-			null;
++		let range = this.rangesIt.current();
++		return range != null && this.lineIndex >= range.start() && this.lineIndex < range.end()
++				? this.subtitle.line(this.lineIndex) : null;
+ 	};
+ 
+ 	this.hasNext = function() {
+-		return this.rangesIt.hasNext() || (this.rangesIt.current() && (this.forward ?
+-			this.lineIndex < this.rangesIt.current().end() :
+-			this.lineIndex > this.rangesIt.current().start()));
++		return this.rangesIt.hasNext() || (this.rangesIt.current() &&
++			(this.forward ? this.lineIndex < this.rangesIt.current().end() : this.lineIndex > this.rangesIt.current().start())
++			);
+ 	};
+ 
+ 	this.next = function() {
+-		var currentRange = this.rangesIt.current();
+-		if ( currentRange == null
+-			 || (forward && this.lineIndex == currentRange.end())
+-			 || (! forward && this.lineIndex == currentRange.start()) )
+-		{
+-			if ( ! this.rangesIt.hasNext() )
++		let currentRange = this.rangesIt.current();
++		if(currentRange == null || (this.lineIndex == (forward ? currentRange.end() : currentRange.start()))) {
++			if(!this.rangesIt.hasNext())
+ 				return null;
+ 			currentRange = this.rangesIt.next();
+ 			this.lineIndex = this.forward ? currentRange.start() : currentRange.end();
+-		}
+-		else
++		} else {
+ 			this.lineIndex += this.forward ? 1 : -1;
+-		return this.subtitle.line( this.lineIndex )
++		}
++		return this.subtitle.line(this.lineIndex);
+ 	};
+ }
+ 
+-var rangesIt = new RangesIterator( ranges.newSelectionRangeList(), true );
+-while ( rangesIt.hasNext() )
+-{
+-	var range = rangesIt.next();
++let rangesIt = new RangesIterator(ranges.newSelectionRangeList(), true);
++while(rangesIt.hasNext()) {
++	let range = rangesIt.next();
+ 	debug.information( range.start().toString() + ":" + range.end().toString() );
+ }
+ 
+-var linesIt = new LinesIterator( ranges.newSelectionRangeList(), false );
+-while ( linesIt.hasNext() )
+-{
+-	var line = linesIt.next();
+-	debug.information( "Plain text: " + line.plainPrimaryText() + "\n\nRich Text: " + line.richPrimaryText() );
++let linesIt = new LinesIterator( ranges.newSelectionRangeList(), false );
++while(linesIt.hasNext()) {
++	let line = linesIt.next();
++	debug.information("Plain text: " + line.plainPrimaryText() + "\n\nRich Text: " + line.richPrimaryText());
+ }
+diff --git a/src/scripting/examples/example_remove_impair_lines.js b/src/scripting/examples/example_remove_impair_lines.js
+deleted file mode 100644
+index 0e029ef3..00000000
+--- a/src/scripting/examples/example_remove_impair_lines.js
++++ /dev/null
+@@ -1,12 +0,0 @@
+-/*
+-    SPDX-FileCopyrightText: 2007-2009 Sergio Pistone <sergio_pistone@yahoo.com.ar>
+-
+-    SPDX-License-Identifier: GPL-2.0-or-later
+-*/
+-
+-s = subtitle.instance();
+-for ( var lineIndex = s.linesCount() - 1; lineIndex >= 0; --lineIndex )
+-{
+-	if ( lineIndex % 2 == 0 )
+-		s.removeLine( lineIndex );
+-}
+diff --git a/src/scripting/examples/example_remove_odd_lines.js b/src/scripting/examples/example_remove_odd_lines.js
+new file mode 100644
+index 00000000..6202ee42
+--- /dev/null
++++ b/src/scripting/examples/example_remove_odd_lines.js
+@@ -0,0 +1,17 @@
++/*
++	SPDX-FileCopyrightText: 2007-2009 Sergio Pistone <sergio_pistone@yahoo.com.ar>
++
++	SPDX-License-Identifier: GPL-2.0-or-later
++
++	@category Examples
++	@name Remove Odd Lines
++	@version 1.0
++	@summary Example script to remove odd lines.
++	@author SubtitleComposer Team
++*/
++
++let s = subtitle.instance();
++for(let i = s.linesCount() - 1; i >= 0; i--) {
++	if(i % 2 == 0)
++		s.removeLine(i);
++}
+diff --git a/src/scripting/examples/example_trim_to_selection.js b/src/scripting/examples/example_trim_to_selection.js
+index edb97d66..1f16dd4e 100644
+--- a/src/scripting/examples/example_trim_to_selection.js
++++ b/src/scripting/examples/example_trim_to_selection.js
+@@ -1,7 +1,13 @@
+ /*
+-    SPDX-FileCopyrightText: 2007-2009 Sergio Pistone <sergio_pistone@yahoo.com.ar>
++	SPDX-FileCopyrightText: 2007-2009 Sergio Pistone <sergio_pistone@yahoo.com.ar>
+ 
+-    SPDX-License-Identifier: GPL-2.0-or-later
++	SPDX-License-Identifier: GPL-2.0-or-later
++
++	@category Examples
++	@name Remove Unselected Lines
++	@version 1.0
++	@summary Example script to remove all lines except the selected ones.
++	@author SubtitleComposer Team
+ */
+ 
+-subtitle.instance().removeLines( ranges.newSelectionRangeList().complement() );
++subtitle.instance().removeLines(ranges.newSelectionRangeList().complement());
+diff --git a/src/scripting/examples/remove_hearing_impaired_text.js b/src/scripting/examples/remove_hearing_impaired_text.js
+index a14b4e00..459b9c4e 100644
+--- a/src/scripting/examples/remove_hearing_impaired_text.js
++++ b/src/scripting/examples/remove_hearing_impaired_text.js
+@@ -1,7 +1,13 @@
+ /*
+-    SPDX-FileCopyrightText: 2007-2009 Sergio Pistone <sergio_pistone@yahoo.com.ar>
++	SPDX-FileCopyrightText: 2007-2009 Sergio Pistone <sergio_pistone@yahoo.com.ar>
++	SPDX-FileCopyrightText: 2021 Mladen Milinkovic <maxrd2@smoothware.net>
+ 
+-    SPDX-License-Identifier: GPL-2.0-or-later
++	SPDX-License-Identifier: GPL-2.0-or-later
++
++	@name Remove Hearing Impaired Text
++	@version 1.0
++	@summary Remove hearing impaired text from subtitle lines.
++	@author SubtitleComposer Team
+ */
+ 
+ var s = subtitle.instance();
+@@ -12,7 +18,8 @@ for(var i = s.linesCount() - 1; i >= 0; i--) {
+ 			.replace(/\s*\[[^\]]+\]\s*/, ' ')
+ 			.replace(/^(<.*>)?.*:\s*/, '$1')
+ 			.replace(/(^\s*|\s*$)/, '');
+-	if(text.replace(/(<[^>]+>|\s)/, '') == '')
++
++	if(text.replace(/(<[^>]+>|\s)/, '') === '')
+ 		s.removeLine(i);
+ 	else
+ 		line.setRichPrimaryText(text);
+diff --git a/src/scripting/scriptsmanager.cpp b/src/scripting/scriptsmanager.cpp
+index 096b2149..fa25ddd5 100644
+--- a/src/scripting/scriptsmanager.cpp
++++ b/src/scripting/scriptsmanager.cpp
+@@ -43,6 +43,21 @@
+ #include <KIO/JobUiDelegate>
+ #endif
+ 
++inline static const QDir &
++userScriptDir()
++{
++	static const QDir *dir = nullptr;
++	if(dir == nullptr) {
++		const QString userScriptDirName = $("scripts");
++		static QDir d(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
++		if(!d.exists(userScriptDirName))
++			d.mkpath(userScriptDirName);
++		d.cd(userScriptDirName);
++		dir = &d;
++	}
++	return *dir;
++}
++
+ namespace SubtitleComposer {
+ class InstalledScriptsModel : public QStringListModel
+ {
+@@ -150,12 +165,23 @@ ScriptsManager::createScript(const QString &sN)
+ {
+ 	QString scriptName = sN;
+ 
+-	while(scriptName.isEmpty() || m_scripts.contains(scriptName)) {
+-		if(m_scripts.contains(scriptName)
+-			&& KMessageBox::questionYesNo(app()->mainWindow(),
++	QMap<QString, QString>::const_iterator it;
++	while(scriptName.isEmpty() || (it = m_scripts.constFind(scriptName)) != m_scripts.cend()) {
++		if(!scriptName.isEmpty()) {
++			qDebug() << "porco diio" << it.key() << ":" << it.value();
++			QFileInfo fp(it.value());
++			qDebug() << "porco 2" << fp.canonicalFilePath() << " startsWith " << userScriptDir().canonicalPath() << "???" <<
++					!fp.canonicalFilePath().startsWith(userScriptDir().canonicalPath());
++			if(!fp.canonicalFilePath().startsWith(userScriptDir().canonicalPath())) {
++				// a system script can be overridden by user
++				scriptName = it.key();
++				break;
++			}
++			if(KMessageBox::questionYesNo(app()->mainWindow(),
+ 				i18n("You must enter an unused name to continue.\nWould you like to enter another name?"),
+ 				i18n("Name Already Used"), KStandardGuiItem::cont(), KStandardGuiItem::cancel()) != KMessageBox::Yes)
+ 			return;
++		}
+ 
+ 		TextInputDialog nameDlg(i18n("Create New Script"), i18n("Script name:"));
+ 		if(nameDlg.exec() != QDialog::Accepted)
+@@ -163,24 +189,19 @@ ScriptsManager::createScript(const QString &sN)
+ 		scriptName = nameDlg.value();
+ 	}
+ 
+-	QDir scriptPath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
+-	if(!scriptPath.exists("scripts"))
+-		scriptPath.mkpath("scripts");
+-	scriptPath.cd("scripts");
+-
+-	QFile scriptFile(scriptPath.absoluteFilePath(scriptName));
++	QFile scriptFile(userScriptDir().absoluteFilePath(scriptName));
+ 	if(!scriptFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+-		KMessageBox::sorry(app()->mainWindow(), i18n("There was an error creating the file <b>%1</b>.", scriptPath.absoluteFilePath(scriptName)));
++		KMessageBox::sorry(app()->mainWindow(), i18n("There was an error creating the file <b>%1</b>.", userScriptDir().absoluteFilePath(scriptName)));
+ 		return;
+ 	}
+ 
+ 	QTextStream outputStream(&scriptFile);
+-	QString scriptExtension = QFileInfo(scriptName).suffix().toLower();
+-	if(scriptExtension == QLatin1String("rb"))
+-		outputStream << "#!/usr/bin/env ruby";
+-	else if(scriptExtension == QLatin1String("py"))
+-		outputStream << "#!/usr/bin/env python";
+-	outputStream << "\n";
++	outputStream << "/*\n"
++		"\t@name " << scriptName << " Title\n"
++		"\t@version 1.0\n"
++		"\t@summary " << scriptName << " summary/short desription.\n"
++		"\t@author Author's Name\n"
++		"*/\n";
+ 
+ 	scriptFile.close();
+ 
+@@ -232,11 +253,6 @@ ScriptsManager::addScript(const QUrl &sSU)
+ 		scriptName = nameDlg.value();
+ 	}
+ 
+-	QDir scriptPath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
+-	if(!scriptPath.exists("scripts"))
+-		scriptPath.mkpath("scripts");
+-	scriptPath.cd("scripts");
+-
+ 	FileLoadHelper fileLoadHelper(srcScriptUrl);
+ 
+ 	if(!fileLoadHelper.open()) {
+@@ -244,7 +260,7 @@ ScriptsManager::addScript(const QUrl &sSU)
+ 		return;
+ 	}
+ 
+-	QFile dest(scriptPath.absoluteFilePath(scriptName));
++	QFile dest(userScriptDir().absoluteFilePath(scriptName));
+ 	if(!dest.open(QIODevice::WriteOnly | QIODevice::Truncate)
+ 			|| dest.write(fileLoadHelper.file()->readAll()) == -1
+ 			|| !dest.flush()) {
+@@ -301,14 +317,18 @@ ScriptsManager::editScript(const QString &sN)
+ 	}
+ }
+ 
++static inline QString
++readFileContent(const QString &filename)
++{
++	QFile jsf(filename);
++	if(!jsf.open(QFile::ReadOnly | QFile::Text))
++		return QString();
++	return QTextStream(&jsf).readAll();
++}
++
+ void
+ ScriptsManager::runScript(const QString &sN)
+ {
+-	if(!app()->subtitle()) {
+-		qWarning() << "attempt to run script without a working subtitle";
+-		return;
+-	}
+-
+ 	QString scriptName = sN;
+ 
+ 	if(scriptName.isEmpty()) {
+@@ -330,14 +350,10 @@ ScriptsManager::runScript(const QString &sN)
+ 	jse.globalObject().setProperty("subtitleline", jse.newQObject(new Scripting::SubtitleLineModule));
+ 	jse.globalObject().setProperty("debug", jse.newQObject(new Debug()));
+ 
+-	QString script;
+-	{
+-		QFile jsf(m_scripts[scriptName]);
+-		if(!jsf.open(QFile::ReadOnly | QFile::Text)) {
+-			KMessageBox::error(app()->mainWindow(), i18n("Error opening script %1.", m_scripts[scriptName]), i18n("Error Running Script"));
+-			return;
+-		}
+-		script = QTextStream(&jsf).readAll();
++	QString script = readFileContent(m_scripts[scriptName]);
++	if(script.isNull()) {
++		KMessageBox::error(app()->mainWindow(), i18n("Error opening script %1.", m_scripts[scriptName]), i18n("Error Running Script"));
++		return;
+ 	}
+ 
+ 	QJSValue res;
+@@ -376,12 +392,12 @@ ScriptsManager::toolsMenu()
+ 	return toolsMenu;
+ }
+ 
+-/*static*/ void
++void
+ ScriptsManager::findAllFiles(QString directory, QStringList &fileList)
+ {
+ 	QDir path(directory);
+-	QFileInfoList files = path.entryInfoList();
+-	foreach(QFileInfo file, files) {
++	const QFileInfoList files = path.entryInfoList();
++	for(const QFileInfo &file: files) {
+ 		if(file.isDir()) {
+ 			if(file.fileName().at(0) != '.')
+ 				findAllFiles(file.absoluteFilePath(), fileList);
+@@ -405,15 +421,25 @@ ScriptsManager::reloadScripts()
+ 	toolsMenu->addAction(app()->action(ACT_SCRIPTS_MANAGER));
+ 	toolsMenu->addSeparator();
+ 
+-	QStringList scriptDirs = QStandardPaths::locateAll(QStandardPaths::AppDataLocation, "scripts", QStandardPaths::LocateDirectory);
+-	QStringList scriptNames;
++	QMap<QString, QMenu *> categoryMenus;
++
++	// make sure userScriptDir is first on the list so it will override system scripts
++	const QString userDir = userScriptDir().absolutePath();
++	QStringList scriptDirs = QStandardPaths::locateAll(QStandardPaths::AppDataLocation, userScriptDir().dirName(), QStandardPaths::LocateDirectory);
++	int pos = scriptDirs.indexOf(userDir);
++	if(pos == -1)
++		scriptDirs.prepend(userDir);
++	else if(pos > 0)
++		scriptDirs.move(pos, 0);
++
+ 	int index = 0, newCurrentIndex = -1;
++	QStringList scriptNames;
+ 	foreach(const QString &path, scriptDirs) {
+-		int pathLen = QDir(path).absolutePath().length() + 1;
++		const int pathLen = QDir(path).absolutePath().length() + 1;
+ 		QStringList scriptPaths;
+ 		findAllFiles(path, scriptPaths);
+ 		foreach(const QString &path, scriptPaths) {
+-			QString name = path.mid(pathLen);
++			const QString name = path.mid(pathLen);
+ 			if(m_scripts.contains(name))
+ 				continue;
+ 
+@@ -422,12 +448,38 @@ ScriptsManager::reloadScripts()
+ 			m_scripts[name] = path;
+ 
+ 			if(name.right(3) == $(".js")) {
+-				QAction *scriptAction = toolsMenu->addAction(name);
++				QRegularExpressionMatch m;
++				staticRE$(reCat, "@category\\s+(.+)\\s*$", REm);
++				staticRE$(reName, "@name\\s+(.+)\\s*$", REm);
++				staticRE$(reSummary, "@summary\\s+(.+)\\s*$", REm);
++
++				const QString script = readFileContent(path);
++
++				QMenu *parentMenu = toolsMenu;
++				if((m = reCat.match(script)).hasMatch()) {
++					const QString cat = m.captured(1);
++					auto it = categoryMenus.constFind(cat);
++					if(it != categoryMenus.cend()) {
++						parentMenu = it.value();
++					} else {
++						parentMenu = new QMenu(cat, toolsMenu);
++						categoryMenus[cat] = parentMenu;
++					}
++				}
++
++				m = reName.match(script);
++				const QString title = m.hasMatch() ? m.captured(1) : name;
++				QAction *scriptAction = parentMenu->addAction(title);
+ 				scriptAction->setObjectName(name);
++				if((m = reSummary.match(script)).hasMatch())
++					scriptAction->setStatusTip(m.captured(1));
+ 				actionCollection->addAction(name, scriptAction);
+ 				actionManager->addAction(scriptAction, UserAction::SubOpened | UserAction::FullScreenOff);
+ 			}
+ 
++			for(auto it = categoryMenus.cbegin(); it != categoryMenus.cend(); ++it)
++				toolsMenu->addMenu(it.value());
++
+ 			if(newCurrentIndex < 0 && path == selectedPath)
+ 				newCurrentIndex = index;
+ 			index++;
+-- 
+2.38.1
+
