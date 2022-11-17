@@ -1,4 +1,8 @@
 {
+    "id": "org.kde.subtitlecomposer",
+    "runtime": "org.kde.Platform",
+    "runtime-version": "5.15-21.08",
+    "sdk": "org.kde.Sdk",
     "command": "subtitlecomposer",
     "finish-args": [
         "--share=ipc",
@@ -7,10 +11,6 @@
         "--socket=wayland",
         "--socket=pulseaudio"
     ],
-    "id": "org.kde.subtitlecomposer",
-    "runtime": "org.kde.Platform",
-    "runtime-version": "5.15-21.08",
-    "sdk": "org.kde.Sdk",
     "cleanup": [
         "/include",
         "/lib/pkgconfig",
