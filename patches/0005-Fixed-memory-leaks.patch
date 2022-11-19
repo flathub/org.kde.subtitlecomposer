@@ -1,0 +1,31 @@
+From 911b94b36b1536083e09d427f858baa421acf86b Mon Sep 17 00:00:00 2001
+From: Mladen Milinkovic <maxrd2@smoothware.net>
+Date: Thu, 14 Oct 2021 23:10:28 +0200
+Subject: Fixed memory leaks
+
+---
+ src/core/subtitle.cpp | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/src/core/subtitle.cpp b/src/core/subtitle.cpp
+index 7d9659ae..709fa000 100644
+--- a/src/core/subtitle.cpp
++++ b/src/core/subtitle.cpp
+@@ -1368,10 +1368,12 @@ Subtitle::recheckErrors(const RangeList &ranges)
+ void
+ Subtitle::processAction(UndoAction *action) const
+ {
+-	if(app()->subtitle() == this)
++	if(app()->subtitle() == this) {
+ 		app()->undoStack()->push(action);
+-	else
++	} else {
+ 		action->redo();
++		delete action;
++	}
+ }
+ 
+ void
+-- 
+2.38.1
+
