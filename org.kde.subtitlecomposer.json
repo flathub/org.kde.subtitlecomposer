@@ -80,32 +80,14 @@
             "sources": [
                 {
                     "type": "archive",
-                    "url": "https://download.kde.org/stable/subtitlecomposer/subtitlecomposer-0.7.1.tar.xz",
-                    "sha256": "ef9cb3c0c1fe1f40cf9d8e795859b9b28adf2da3be77a076d46bc28df4cd0255",
+                    "url": "https://download.kde.org/stable/subtitlecomposer/subtitlecomposer-0.8.0.tar.xz",
+                    "sha256": "b1416bdf7223b1979a36620b913c117c1b6c933bf165e28491af476310d7c9f8",
                     "x-checker-data": {
                         "type": "anitya",
                         "project-id": 242855,
                         "stable-only": true,
                         "url-template": "https://download.kde.org/stable/subtitlecomposer/subtitlecomposer-$version.tar.xz"
                     }
-                },
-                {
-                    "type": "patch",
-                    "paths": [
-                        "patches/0001-Fixed-invalid-memory-read.patch",
-                        "patches/0002-Fixed-crash-when-closing-subtitle.patch",
-                        "patches/0003-Fix-crashes-on-empty-lines-list.patch",
-                        "patches/0004-Removed-QSharedData-instances-from-stack.patch",
-                        "patches/0005-Fixed-memory-leaks.patch",
-                        "patches/0006-LinesItemDelegate-fix-inline-rich-editor-crash.patch",
-                        "patches/0007-Fix-compilation-with-ffmpeg5-63.patch",
-                        "patches/0008-VideoPlayer-Fix-usage-of-deprecated-removed-AVCodec-.patch",
-                        "patches/0009-Replaced-Kross-with-QJSEngine.patch",
-                        "patches/0010-Organized-Tools-menu-scripts.patch",
-                        "patches/0011-Improved-script-manager.patch",
-                        "patches/0012-SciptManager-fixed-wrong-filename-title-use.patch",
-                        "patches/0013-newer-ffmpeg.patch"
-                    ]
                 }
             ]
         }
