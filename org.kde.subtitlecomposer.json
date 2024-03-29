@@ -72,10 +72,11 @@
             ]
         },
         {
-            "buildsystem": "cmake-ninja",
             "name": "subtitlecomposer",
+            "buildsystem": "cmake-ninja",
             "config-opts": [
-                "-DBUILD_TESTING=OFF"
+                "-DBUILD_TESTING=OFF",
+                "-DQT_MAJOR_VERSION=6"
             ],
             "sources": [
                 {
