@@ -5,12 +5,12 @@
     "sdk": "org.kde.Sdk",
     "command": "subtitlecomposer",
     "finish-args": [
-        "--share=ipc",
         "--device=dri",
+        "--filesystem=host",
+        "--share=ipc",
         "--socket=fallback-x11",
-        "--socket=wayland",
         "--socket=pulseaudio",
-        "--filesystem=host"
+        "--socket=wayland"
     ],
     "cleanup": [
         "*.la",
