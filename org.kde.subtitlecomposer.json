@@ -81,15 +81,9 @@
             ],
             "sources": [
                 {
-                    "type": "archive",
-                    "url": "https://download.kde.org/stable/subtitlecomposer/subtitlecomposer-0.8.1.tar.xz",
-                    "sha256": "23c022768d7422c092149f41d51ebea80f54b27655573cf43f736efb88c30027",
-                    "x-checker-data": {
-                        "type": "anitya",
-                        "project-id": 242855,
-                        "stable-only": true,
-                        "url-template": "https://download.kde.org/stable/subtitlecomposer/subtitlecomposer-$version.tar.xz"
-                    }
+                    "type": "git",
+                    "url": "https://invent.kde.org/multimedia/subtitlecomposer.git",
+                    "commit": "10aad738194d675ac4cfcde62097938e6921d25e"
                 }
             ]
         }
