@@ -81,8 +81,8 @@
             "sources": [
                 {
                     "type": "archive",
-                    "url": "https://download.kde.org/stable/subtitlecomposer/subtitlecomposer-0.8.1.tar.xz",
-                    "sha256": "23c022768d7422c092149f41d51ebea80f54b27655573cf43f736efb88c30027",
+                    "url": "https://download.kde.org/stable/subtitlecomposer/subtitlecomposer-0.8.2.tar.xz",
+                    "sha256": "72e9307f0c7669029f27178cee07395b3dae4cef99accc6720e41fa511b40fe5",
                     "x-checker-data": {
                         "type": "anitya",
                         "project-id": 242855,
