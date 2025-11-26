@@ -79,6 +79,10 @@
                         "stable-only": true,
                         "url-template": "https://download.kde.org/stable/subtitlecomposer/subtitlecomposer-$version.tar.xz"
                     }
+                },
+                {
+                    "type": "patch",
+                    "path": "1e11d53565ab6df3ba8329072e7b4b12f9f88d72.patch"
                 }
             ]
         }
